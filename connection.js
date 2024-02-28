@@ -5,7 +5,7 @@ const pool = mysql.createConnection({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || 'root',
   database: process.env.DB_DATABASE || 'test',
-  connectTimeout: 10000
+  connectTimeout: 1000000
 });
 
 export default pool;
