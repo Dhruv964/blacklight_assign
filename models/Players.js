@@ -16,13 +16,12 @@ const getFormattedResult = (result) => {
 export const getPlayerDetails = async (uid) => {
   try {
     const result = await connection.sequelize.query(
-      `select uid,name,(total_score/num_scores) as avg_score,country,
-      dense_rank() over(order by total_score/num_scores desc) 
-      as player_rank from
-      (SELECT uid, name, SUM(score) AS total_score, COUNT(*) AS num_scores, country
-      FROM players 
-      GROUP BY uid) as player_with_scrore where uid = ?;`,
-      [uid]
+      `select UID,Name,Score,Country,player_rank
+      from
+      (SELECT UID, Name, Score , Country,dense_rank() over(order by Score desc) 
+      as player_rank
+      FROM MOCK_DATA
+      GROUP BY uid) as player_with_score where uid = '${uid}';`
     )
 
     if (!result[0].length) {
@@ -34,8 +33,27 @@ export const getPlayerDetails = async (uid) => {
     return new Error(`Error fetching player: ${error.message}`)
   }
 }
+const getLastWeekLeaderboardHelper = async (country) => {
+  try {
+    const lastWeekTimestamp = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 19)
+      .replace('T', ' ')
+    const result = await connection.sequelize.query(
+      `select *,RANK() over (order by Score DESC) as player_rank from MOCK_DATA where Timestamp <= '${lastWeekTimestamp}' and Country='${country}' order by Score DESC`
+    )
 
-const getLeaderboard = async (startOfWeek, endOfWeek, ...options) => {
+    if (!result[0].length) {
+      console.log('No data available for provided week leaderboard.')
+      return new Error('No data available for provided week leaderboard.')
+    }
+
+    return getFormattedResult(result)
+  } catch (error) {
+    return new Error(`Error fetching leaderboard: ${error.message}`)
+  }
+}
+const getLeaderboard = async (...options) => {
   try {
     const countryQuery = ''
     if (options.length > 0) {
@@ -81,9 +99,7 @@ export const getCurrentWeekLeaderboard = async () => {
 
 export const getLastWeekLeaderboard = async (country) => {
   try {
-    const [startOfWeek, endOfWeek] = getLastWeek()
-    console.log(startOfWeek, endOfWeek)
-    return await getLeaderboard(startOfWeek, endOfWeek, country)
+    return await getLastWeekLeaderboardHelper(country)
   } catch (error) {
     return new Error(`Error fetching leaderboard: ${error.message}`)
   }
