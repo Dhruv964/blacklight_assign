@@ -31,7 +31,6 @@ app.get('/rank/:uid', async (req, res) => {
 
 const start = async() => {
     try {
-     const conn = await pool.getConnection()
      console.log('Connected to DB')
      app.listen(3000,() => {console.log("Listening on Port 3000")})
     }
