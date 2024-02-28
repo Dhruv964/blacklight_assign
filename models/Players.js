@@ -75,23 +75,9 @@ const getLeaderboard = async (...options) => {
   }
 }
 
-const getCurrentWeek = () => {
-  let startOfWeek = moment().startOf('week').toDate()
-  let endOfWeek = moment().endOf('week').toDate()
-  return [startOfWeek, endOfWeek]
-}
-
-const getLastWeek = () => {
-  let startOfWeek = moment().subtract(1, 'weeks').startOf('week').toDate()
-  let endOfWeek = moment().subtract(1, 'weeks').endOf('week').toDate()
-  return [startOfWeek, endOfWeek]
-}
-
 export const getCurrentWeekLeaderboard = async () => {
   try {
-    const [startOfWeek, endOfWeek] = getCurrentWeek()
-    console.log(startOfWeek, endOfWeek)
-    return await getLeaderboard(startOfWeek, endOfWeek)
+    return await getLeaderboard()
   } catch (error) {
     return new Error(`Error fetching leaderboard: ${error.message}`)
   }
